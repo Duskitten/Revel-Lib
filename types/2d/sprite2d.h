@@ -5,7 +5,7 @@
 extern "C"{
 #endif
 
-#include "../../revel_lib.h"
+#include "../../revel-lib.h"
 #include "../resource/texture.h"
 typedef struct {
     CoreObject* object;

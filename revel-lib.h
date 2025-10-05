@@ -1,7 +1,6 @@
 #ifndef INCLUDE_REVEL_LIB
 #define INCLUDE_REVEL_LIB
 
-
 #if __cplusplus__
 extern "C"{
 #endif

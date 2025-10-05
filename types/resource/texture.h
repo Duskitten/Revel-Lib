@@ -5,8 +5,8 @@
 #if __cplusplus__
 extern "C"{
 #endif
-#include "../../revel_lib.h"
-#include "../../3rdParty/stb/stb_image.h"
+#include "../../revel-lib.h"
+#include "../../3rdparty/stb/stb_image.h"
 
 //Begin!
 typedef struct {
