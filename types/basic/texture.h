@@ -5,7 +5,7 @@
 #if __cplusplus__
 extern "C"{
 #endif
-#include "../../revel-lib.h"
+#include "../../revel-define.h"
 #include "../../3rdparty/stb/stb_image.h"
 
 //Begin!
