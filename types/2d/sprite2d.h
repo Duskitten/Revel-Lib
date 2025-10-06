@@ -56,14 +56,14 @@ void draw_sprite2d(Sprite2D* sprite){
 
     vertices[0].u = 0;
     vertices[0].v = 0;
-    vertices[0].modulate = 0xFFFFFFFF;
+    vertices[0].modulate = sprite->modulate;
     vertices[0].x = sprite->object->local_position.x;
     vertices[0].y = sprite->object->local_position.y;
     vertices[0].z = 0.0f;
 
     vertices[1].u = sprite->texture->size.x;
     vertices[1].v = -sprite->texture->size.y;
-    vertices[1].modulate = 0xFFFFFFFF;
+    vertices[1].modulate = sprite->modulate;
     vertices[1].x = (sprite->object->local_position.x + sprite->texture->size.x);
     vertices[1].y = (sprite->object->local_position.y + sprite->texture->size.y);
     vertices[1].z = 0.0f;
