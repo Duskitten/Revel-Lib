@@ -37,13 +37,14 @@ typedef struct
 *- This functions within 2D space only
 *
 */
-Sprite2D* create_sprite2d(Vector2 uv_a, Vector2 uv_b,Texture* tex){
+Sprite2D* create_sprite2d(Vector2 uv_a, Vector2 uv_b, uint32_t modulate, Texture* tex){
     Sprite2D* sprite = malloc(sizeof(Sprite2D));
     if(sprite != NULL){
         sprite->object = create_coreobject();
         sprite->uv_a = uv_a;
         sprite->uv_b = uv_b;
         sprite->texture = tex;
+        sprite->modulate = modulate;
         return sprite;
     }else{
         return NULL;
@@ -53,21 +54,24 @@ Sprite2D* create_sprite2d(Vector2 uv_a, Vector2 uv_b,Texture* tex){
 void draw_sprite2d(Sprite2D* sprite){
     static TextureVertex vertices[2];
 
-    vertices[0].u = sprite->uv_a.x;
-    vertices[0].v = sprite->uv_a.y;
-    vertices[0].modulate = sprite->modulate;
+    vertices[0].u = 0;
+    vertices[0].v = 0;
+    vertices[0].modulate = 0xFFFFFFFF;
     vertices[0].x = sprite->object->local_position.x;
     vertices[0].y = sprite->object->local_position.y;
     vertices[0].z = 0.0f;
 
-    vertices[1].u = sprite->uv_b.x;;
-    vertices[1].v = sprite->uv_b.y;
-    vertices[1].modulate = sprite->modulate;
+    vertices[1].u = sprite->texture->size.x;
+    vertices[1].v = -sprite->texture->size.y;
+    vertices[1].modulate = 0xFFFFFFFF;
     vertices[1].x = (sprite->object->local_position.x + sprite->texture->size.x);
     vertices[1].y = (sprite->object->local_position.y + sprite->texture->size.y);
     vertices[1].z = 0.0f;
+    bind_texture(sprite->texture);
+    sceGuTexImage(0, sprite->texture->size.x, sprite->texture->size.y, sprite->texture->size.x, sprite->texture->data);
 
-	bind_texture(sprite);
+
+	//bind_texture(sprite->texture);
     sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
 };
 
