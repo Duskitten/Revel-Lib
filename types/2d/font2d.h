@@ -51,7 +51,7 @@ Font2D* create_font2d(int spacing_x, int spacing_y,const char* character_order, 
     }
 };
 
-void draw_font2d(Font2D* font, char* text){
+void draw_font2d(Font2D* font, Vector2i Position, char* text){
     int length = 0;
     
     
@@ -114,15 +114,15 @@ void draw_font2d(Font2D* font, char* text){
             vertices[vert_pos].u = pos.x;
             vertices[vert_pos].v = -pos.y;
             vertices[vert_pos].modulate = font->modulate;
-            vertices[vert_pos].x = font->object->local_position.x + (font->spacing_x * line_pos) + (font->character_size.x* line_pos);
-            vertices[vert_pos].y = font->object->local_position.y + (font->spacing_y * nextY) + (font->character_size.y * nextY);
+            vertices[vert_pos].x = Position.x + (font->spacing_x * line_pos) + (font->character_size.x* line_pos);
+            vertices[vert_pos].y = Position.y + (font->spacing_y * nextY) + (font->character_size.y * nextY);
             vertices[vert_pos].z = 0.0f;
 
             vertices[vert_pos+1].u = pos.x + font->character_size.x;
             vertices[vert_pos+1].v = -(pos.y + font->character_size.y);
             vertices[vert_pos+1].modulate = font->modulate;
-            vertices[vert_pos+1].x = (font->object->local_position.x + font->character_size.x) + (font->spacing_x * line_pos) + (font->character_size.x * line_pos);
-            vertices[vert_pos+1].y = (font->object->local_position.y + font->character_size.y) + (font->spacing_y * nextY) + (font->character_size.y * nextY);
+            vertices[vert_pos+1].x = (Position.x + font->character_size.x) + (font->spacing_x * line_pos) + (font->character_size.x * line_pos);
+            vertices[vert_pos+1].y = (Position.y + font->character_size.y) + (font->spacing_y * nextY) + (font->character_size.y * nextY);
             vertices[vert_pos+1].z = 0.0f;
             real_pos += 1;
             line_pos += 1;
