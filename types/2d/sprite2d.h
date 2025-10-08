@@ -38,7 +38,7 @@ typedef struct
 *
 */
 Sprite2D* create_sprite2d(Vector2 uv_a, Vector2 uv_b, uint32_t modulate, Texture* tex){
-    Sprite2D* sprite = malloc(sizeof(Sprite2D));
+    Sprite2D* sprite = (Sprite2D*)malloc(sizeof(Sprite2D));
     if(sprite != NULL){
         sprite->object = create_coreobject();
         sprite->uv_a = uv_a;
@@ -52,7 +52,8 @@ Sprite2D* create_sprite2d(Vector2 uv_a, Vector2 uv_b, uint32_t modulate, Texture
 };
 
 void draw_sprite2d(Sprite2D* sprite){
-    static TextureVertex vertices[2];
+    int length = 2;
+    TextureVertex vertices[length];
 
     vertices[0].u = 0;
     vertices[0].v = 0;
@@ -67,12 +68,13 @@ void draw_sprite2d(Sprite2D* sprite){
     vertices[1].x = (sprite->object->local_position.x + sprite->texture->size.x);
     vertices[1].y = (sprite->object->local_position.y + sprite->texture->size.y);
     vertices[1].z = 0.0f;
+
     bind_texture(sprite->texture);
     sceGuTexImage(0, sprite->texture->size.x, sprite->texture->size.y, sprite->texture->size.x, sprite->texture->data);
 
 
 	//bind_texture(sprite->texture);
-    sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
+    sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, length, 0, vertices);
 };
 
 #if __cplusplus__

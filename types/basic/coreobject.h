@@ -25,7 +25,7 @@ typedef struct {
 
 
 CoreObject* create_coreobject(){
-    CoreObject* coreobject = malloc(sizeof(CoreObject));
+    CoreObject* coreobject = (CoreObject*)malloc(sizeof(CoreObject));
 
     if(coreobject != NULL){
         coreobject->local_position = (Vector3){0,0,0};
