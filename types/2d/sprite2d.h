@@ -5,77 +5,74 @@
 extern "C"{
 #endif
 
-//Include Revel Libs
 #include "../../revel-define.h"
+
+//Add Revel Libs
 #include "../basic/coreobject.h"
 #include "../basic/texture.h"
 
-//Include System Libs
+//Add Other libs
 #include <malloc.h>
-
-//Include PSP Libs
-#include <pspgu.h>
-
-//Begin!
-typedef struct {
-    CoreObject* object;
-    Vector2 uv_a;
-    Vector2 uv_b;
-    Texture* texture;
-    uint32_t modulate;
-    void* data;
-} Sprite2D;
 
 typedef struct
 {
+    CoreObject* core;
+    ScePspFVector2 uv_a;
+    ScePspFVector2 uv_b;
+    ScePspFVector2 size;
+	unsigned int modulate;
+    Texture* texture;
+} Sprite2D;
+
+//Taken from here: https://pspdev.github.io/basic_programs.html
+typedef struct
+{
     float u, v;
-    uint32_t modulate;
+    uint32_t colour;
     float x, y, z;
 } TextureVertex;
-/*
-*Creates a new Sprite2D object.
-*- This functions within 2D space only
-*
-*/
-Sprite2D* create_sprite2d(Vector2 uv_a, Vector2 uv_b, uint32_t modulate, Texture* tex){
+
+
+Sprite2D* create_sprite2d(Texture* texture, unsigned int modulate, 
+    ScePspFVector2 uv_a,ScePspFVector2 uv_b, ScePspFVector2 size){
+
     Sprite2D* sprite = (Sprite2D*)malloc(sizeof(Sprite2D));
+    
     if(sprite != NULL){
-        sprite->object = create_coreobject();
+        sprite->texture = texture;
         sprite->uv_a = uv_a;
         sprite->uv_b = uv_b;
-        sprite->texture = tex;
         sprite->modulate = modulate;
-        return sprite;
-    }else{
-        return NULL;
+        sprite->size = size;
     }
-};
 
-void draw_sprite2d(Sprite2D* sprite){
-    int length = 2;
-    TextureVertex vertices[length];
+    return sprite;
+    
 
-    vertices[0].u = 0;
-    vertices[0].v = 0;
-    vertices[0].modulate = sprite->modulate;
-    vertices[0].x = sprite->object->local_position.x;
-    vertices[0].y = sprite->object->local_position.y;
+}
+
+//Taken from here: https://pspdev.github.io/basic_programs.html
+//And modified for Revel Engine.
+void draw_sprite2d(Sprite2D* sprite) {
+    static TextureVertex vertices[2];
+
+    vertices[0].u = sprite->uv_a.x;
+    vertices[0].v = sprite->uv_a.y;
+    vertices[0].colour = sprite->modulate;
+    vertices[0].x = sprite->core->position.x;
+    vertices[0].y = sprite->core->position.y;
     vertices[0].z = 0.0f;
 
-    vertices[1].u = sprite->texture->size.x;
-    vertices[1].v = -sprite->texture->size.y;
-    vertices[1].modulate = sprite->modulate;
-    vertices[1].x = (sprite->object->local_position.x + sprite->texture->size.x);
-    vertices[1].y = (sprite->object->local_position.y + sprite->texture->size.y);
+    vertices[1].u = sprite->uv_b.x;
+    vertices[1].v = sprite->uv_b.y;
+    vertices[1].colour = sprite->modulate;
+    vertices[1].x = sprite->core->position.x + sprite->size.x;
+    vertices[1].y = sprite->core->position.y + sprite->size.y;
     vertices[1].z = 0.0f;
 
     bind_texture(sprite->texture);
-    sceGuTexImage(0, sprite->texture->size.x, sprite->texture->size.y, sprite->texture->size.x, sprite->texture->data);
-
-
-	//bind_texture(sprite->texture);
-    sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, length, 0, vertices);
-};
+    sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
+}
 
 #if __cplusplus__
 };

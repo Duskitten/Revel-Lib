@@ -1,37 +1,30 @@
 #ifndef INCLUDE_REVEL_LIB_TEXTURE
 #define INCLUDE_REVEL_LIB_TEXTURE
 
-
 #if __cplusplus__
 extern "C"{
 #endif
 
-//Include Revel Libs
 #include "../../revel-define.h"
 
-//Include 3rd Party Libs
-#include "../../3rdparty/stb/stb_image.h"
+//Add STB Lib
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
-//Include PSP Libs
+//Add PSP libs
+#include <pspkernel.h>
+#include <pspdisplay.h>
 #include <pspgu.h>
 #include <pspgum.h>
-#include <pspge.h>
-#include <pspdisplay.h>
-#include <pspkernel.h>
 
+//Add Other libs
+#include <string.h>
+#include <malloc.h>
 
-//Begin!
-typedef struct {
-    Vector2i size;
-    Vector2i psize;
-    void* data;
-} Texture;
-
-
-// This function is taken from : 
-// https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/common
-// Under MIT License
-unsigned int getMemorySize(unsigned int width, unsigned int height, unsigned int psm)
+//Taken from here: https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/3-Textures/sceGu
+//And licensed under the MIT license.
+// Get Memory Size
+static unsigned int getMemorySize(unsigned int width, unsigned int height, unsigned int psm)
 {
 	switch (psm)
 	{
@@ -56,9 +49,9 @@ unsigned int getMemorySize(unsigned int width, unsigned int height, unsigned int
 	}
 }
 
-// This function is taken from : 
-// https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/common
-// Under MIT License
+//Taken from here: https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/3-Textures/sceGu
+//And licensed under the MIT license.
+// Vram Buffer Request
 void* getStaticVramBuffer(unsigned int width, unsigned int height, unsigned int psm)
 {
 	static unsigned int staticOffset = 0;
@@ -69,19 +62,25 @@ void* getStaticVramBuffer(unsigned int width, unsigned int height, unsigned int 
 	return result;
 }
 
-// This function is taken from : 
-// https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/common
-// Under MIT License
+//Taken from here: https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/3-Textures/sceGu
+//And licensed under the MIT license.
+// Vram Texture Request
 void* getStaticVramTexture(unsigned int width, unsigned int height, unsigned int psm)
 {
 	void* result = getStaticVramBuffer(width,height,psm);
 	return (void*)(((unsigned int)result) + ((unsigned int)sceGeEdramGetAddr()));
 }
 
+//Taken from here: https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/3-Textures/sceGu
+//And licensed under the MIT license.
+typedef struct {
+    unsigned int width, height;
+    unsigned int pW, pH;
+    void* data;
+}Texture;
 
-// This function is taken from : 
-// https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/common
-// Under MIT License
+//Taken from here: https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/3-Textures/sceGu
+//And licensed under the MIT license.
 void swizzle_fast(u8 *out, const u8 *in, const unsigned int width, const unsigned int height) {
     unsigned int blockx, blocky;
     unsigned int j;
@@ -112,9 +111,8 @@ void swizzle_fast(u8 *out, const u8 *in, const unsigned int width, const unsigne
     }
 }
 
-// This function is taken from : 
-// https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/common
-// Under MIT License
+//Taken from here: https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/3-Textures/sceGu
+//And licensed under the MIT license.
 unsigned int pow2(const unsigned int value) {
     unsigned int poweroftwo = 1;
     while (poweroftwo < value) {
@@ -123,9 +121,8 @@ unsigned int pow2(const unsigned int value) {
     return poweroftwo;
 }
 
-// This function is taken from : 
-// https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/common
-// Under MIT License
+//Taken from here: https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/3-Textures/sceGu
+//And licensed under the MIT license.
 void copy_texture_data(void* dest, const void* src, const int pW, const int width, const int height){
     for (unsigned int y = 0; y < height; y++) {
         for (unsigned int x = 0; x < width; x++) {
@@ -134,71 +131,64 @@ void copy_texture_data(void* dest, const void* src, const int pW, const int widt
     }
 }
 
-
-
-// This function is taken from : 
-// https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/common
-// Under MIT License and has modifications for Revel Lib.
-Texture* create_texture(const char* filename, const int vram){
+//Taken from here: https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/3-Textures/sceGu
+//And licensed under the MIT license.
+Texture* load_texture(const char* filename, const int vram) {
     int width, height, nrChannels;    
-    stbi_set_flip_vertically_on_load(GU_TRUE);
+    stbi_set_flip_vertically_on_load(GU_FALSE);
     unsigned char *data = stbi_load(filename, &width, &height,
                                     &nrChannels, STBI_rgb_alpha);
 
-    if(!data){
+    if(!data)
         return NULL;
-    }
 
-    Texture* texture = (Texture*)malloc(sizeof(Texture));
-    texture->size = (Vector2i){width, height};
-    texture->psize = (Vector2i){pow2(width), pow2(height)};
+    Texture* tex = (Texture*)malloc(sizeof(Texture));
+    tex->width = width;
+    tex->height = height;
+    tex->pW = pow2(width);
+    tex->pH = pow2(height);
 
     unsigned int *dataBuffer =
-        (unsigned int *)memalign(16, texture->psize.y * texture->psize.x * 4);
+        (unsigned int *)memalign(16, tex->pH * tex->pW * 4);
 
     // Copy to Data Buffer
-    copy_texture_data(dataBuffer, data, texture->psize.x, texture->size.x, texture->size.y);
+    copy_texture_data(dataBuffer, data, tex->pW, tex->width, tex->height);
 
     // Free STB Data
     stbi_image_free(data);
 
     unsigned int* swizzled_pixels = NULL;
-    size_t size = texture->psize.y * texture->psize.x * 4;
+    size_t size = tex->pH * tex->pW * 4;
     if(vram){
-        swizzled_pixels = getStaticVramTexture(texture->psize.x, texture->psize.y, GU_PSM_8888);
+        swizzled_pixels = getStaticVramTexture(tex->pW, tex->pH, GU_PSM_8888);
     } else {
         swizzled_pixels = (unsigned int *)memalign(16, size);
     }
     
-    swizzle_fast((u8*)swizzled_pixels, (const u8*)dataBuffer, texture->psize.x * 4, texture->psize.y);
+    swizzle_fast((u8*)swizzled_pixels, (const u8*)dataBuffer, tex->pW * 4, tex->pH);
 
     free(dataBuffer);
-    texture->data = swizzled_pixels;
+    tex->data = swizzled_pixels;
 
     sceKernelDcacheWritebackInvalidateAll();
 
-    return texture;
+    return tex;
 }
 
-// This function is taken from : 
-// https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/common
-// Under MIT License
-void bind_texture(Texture* texture) {
-    if(texture == NULL)
+//Taken from here: https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/3-Textures/sceGu
+//And licensed under the MIT license.
+void bind_texture(Texture* tex) {
+    if(tex == NULL)
         return;
 
     sceGuTexMode(GU_PSM_8888, 0, 0, 1);
     sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
     sceGuTexFilter(GU_NEAREST, GU_NEAREST);
     sceGuTexWrap(GU_REPEAT, GU_REPEAT);
-    sceGuTexImage(0, texture->size.x, texture->size.y, texture->size.x, texture->data);
+    sceGuTexImage(0, tex->pW, tex->pH, tex->pW, tex->data);
 }
-
-
 
 #if __cplusplus__
 };
 #endif
-
-
 #endif
