@@ -7,20 +7,6 @@ extern "C"{
 
 #include "../../revel-define.h"
 
-//Add STB Lib
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
-//Add PSP libs
-#include <pspkernel.h>
-#include <pspdisplay.h>
-#include <pspgu.h>
-#include <pspgum.h>
-
-//Add Other libs
-#include <string.h>
-#include <malloc.h>
-
 //Taken from here: https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/3-Textures/sceGu
 //And licensed under the MIT license.
 // Get Memory Size
@@ -76,7 +62,7 @@ void* getStaticVramTexture(unsigned int width, unsigned int height, unsigned int
 typedef struct {
     unsigned int width, height;
     unsigned int pW, pH;
-    void* data;
+    unsigned char* data;
 }Texture;
 
 //Taken from here: https://github.com/IridescentRose/PSP-GPU-Tutorials/tree/master/3-Textures/sceGu
@@ -157,12 +143,12 @@ Texture* load_texture(const char* filename, const int vram) {
     // Free STB Data
     stbi_image_free(data);
 
-    unsigned int* swizzled_pixels = NULL;
+    unsigned char* swizzled_pixels = NULL;
     size_t size = tex->pH * tex->pW * 4;
     if(vram){
         swizzled_pixels = getStaticVramTexture(tex->pW, tex->pH, GU_PSM_8888);
     } else {
-        swizzled_pixels = (unsigned int *)memalign(16, size);
+        swizzled_pixels = (unsigned char *)memalign(16, size);
     }
     
     swizzle_fast((u8*)swizzled_pixels, (const u8*)dataBuffer, tex->pW * 4, tex->pH);
