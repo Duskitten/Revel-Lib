@@ -34,13 +34,14 @@ Sprite2D* create_sprite2d(Texture* texture, unsigned int modulate,
     ScePspFVector2 uv_a,ScePspFVector2 uv_b, ScePspFVector2 size){
 
     Sprite2D* sprite = (Sprite2D*)malloc(sizeof(Sprite2D));
-    
+    CoreObject* core = (CoreObject*)malloc(sizeof(CoreObject));
     if(sprite != NULL){
         sprite->texture = texture;
         sprite->uv_a = uv_a;
         sprite->uv_b = uv_b;
         sprite->modulate = modulate;
         sprite->size = size;
+        sprite->core = core;
     }
     sceKernelDcacheWritebackInvalidateAll();
     return sprite;
@@ -67,9 +68,9 @@ void draw_sprite2d(Sprite2D* sprite) {
     vertices[1].y = sprite->core->position.y + sprite->size.y;
     vertices[1].z = 0.0f;
 
+    sceKernelDcacheWritebackInvalidateAll();
     bind_texture(sprite->texture);
     sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
-    sceKernelDcacheWritebackInvalidateAll();
     free(vertices);
 }
 

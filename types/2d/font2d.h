@@ -36,6 +36,8 @@ Font2D* create_font2d(Texture* texture, ScePspIVector2 character_slices, ScePspF
     Font2D* font = (Font2D*)malloc(sizeof(Font2D));
 
     if(font != NULL){
+        CoreObject* core = (CoreObject*)malloc(sizeof(CoreObject));
+        font->core = core;
         font->texture = texture;
         font->character_size = character_size;
         font->character_spacing = character_spacing;
