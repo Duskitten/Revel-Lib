@@ -24,7 +24,7 @@ typedef struct Font2D{
     ScePspFVector2 character_size;
     ScePspIVector2 character_slices;
     ScePspFVector2 character_spacing;
-    FontCharacter* sprites;
+    FontCharacter** sprites;
     unsigned int modulate;
     Texture* texture;
 } Font2D;
@@ -44,26 +44,28 @@ Font2D* create_font2d(Texture* texture, ScePspIVector2 character_slices, ScePspF
         font->character_slices = character_slices;
         unsigned int charlength = strlen(charactersA);
         
-        FontCharacter char_compiler[charlength];
+        FontCharacter* char_compiler[charlength];
         ScePspIVector2 pos = {0,0};
+        int realvalue = 0;
         for(int i = 0; i < charlength; i++){
-            unsigned int looper = i % character_slices.x;
-            pos.x = looper;
-            //unsigned int sizeA = i;
-            //unsigned int sizeB = i*2;
+            if(realvalue == font->character_slices.x){
+                realvalue = 0;
+            }
             
-            if(i != 0 && looper == 0){
+            if(i != 0 && realvalue == 0){
                 pos.y += 1;
             }
-            ScePspIVector2 newposA = {pos.x*font->character_size.x,pos.y*font->character_size.y};
-            ScePspIVector2 newposB = {(pos.x*font->character_size.x)+font->character_size.x,(pos.y*font->character_size.y)+font->character_size.y};
-            FontCharacter character = *(FontCharacter*)malloc(sizeof(FontCharacter));
 
-            character.uv_a = newposA;
-            character.uv_b = newposB;
-            character.character = charactersA[i];
+            ScePspIVector2 newposA = {realvalue*font->character_size.x,pos.y*font->character_size.y};
+            ScePspIVector2 newposB = {(realvalue*font->character_size.x)+font->character_size.x,(pos.y*font->character_size.y)+font->character_size.y};
+            FontCharacter* character = (FontCharacter*)malloc(sizeof(FontCharacter));
+
+            character->uv_a = newposA;
+            character->uv_b = newposB;
+            character->character = charactersA[i];
 
             char_compiler[i] = character;
+            realvalue += 1;
         }
         font->sprites = char_compiler;
     }
@@ -72,42 +74,48 @@ Font2D* create_font2d(Texture* texture, ScePspIVector2 character_slices, ScePspF
     
 }
 
-//This is important for accessing our data.
-//FontCharacter obj = *(font->character_uv_map+charpos);
-
 void draw_font2d(Font2D* font, char* text, ScePspFVector2 position){
     int real_size = strlen(text);
     int doubled_real_size = real_size * 2;
-    TextureVertex vertices[doubled_real_size];
-    int indices[doubled_real_size];
+    //Apparently we need to add buffer space? not totally sure why. But it works.
+    ScePspIVector2 RelayPos = (ScePspIVector2){0,0};
+
+    TextureVertex* vertices = (TextureVertex*)malloc(doubled_real_size * sizeof(TextureVertex));
+    
     for(int x = 0; x < real_size; x++){
         int realX = x*2;
         int realXP1 = realX+1;
         char* found;
         found = strchr(font->characters, text[x]);
+        if(text[x] == '\n'){
+            RelayPos.x = -1;
+            RelayPos.y += 1;
+        } else 
         if(found){
-            FontCharacter sprite = *(font->sprites+(found - font->characters));
+            //pspDebugScreenSetXY(32, x+1);
+            FontCharacter sprite = *font->sprites[(found - font->characters)];
+            pspDebugScreenSetXY(32, x);
+            pspDebugScreenPrintf("%c, with %d", sprite.character, (found - font->characters));
             vertices[realX].u = (float)sprite.uv_a.x;
             vertices[realX].v = (float)sprite.uv_a.y;
             vertices[realX].colour = font->modulate;
-            vertices[realX].x = position.x + (x * font->character_size.x);
-            vertices[realX].y = position.y;
+            vertices[realX].x = position.x + (RelayPos.x * font->character_size.x);
+            vertices[realX].y = position.y+ (RelayPos.y * font->character_size.y);
             vertices[realX].z = 0.0f;
-            indices[realX] = realX;
             
             vertices[realXP1].u = (float)sprite.uv_b.x;
             vertices[realXP1].v = (float)sprite.uv_b.y;
             vertices[realXP1].colour = font->modulate;
-            vertices[realXP1].x = position.x+(x * font->character_size.x) + font->character_size.x;
-            vertices[realXP1].y = position.y + font->character_size.y;
-            vertices[realXP1].z = 0.0f;
-            indices[realXP1] = realXP1;
+            vertices[realXP1].x = position.x + (RelayPos.x * font->character_size.x) + font->character_size.x;
+            vertices[realXP1].y = position.y + font->character_size.y + (RelayPos.y * font->character_size.y);
+            vertices[realXP1].z = 0.0f; 
         }
+        RelayPos.x += 1;
     }
     sceKernelDcacheWritebackInvalidateAll();
     bind_texture(font->texture);
-    sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, doubled_real_size, &indices, vertices);
-    
+    sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, doubled_real_size, 0, vertices);
+    free(vertices);
 }
 
 #if __cplusplus__

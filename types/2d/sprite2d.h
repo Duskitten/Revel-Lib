@@ -11,7 +11,7 @@ extern "C"{
 #include "../basic/coreobject.h"
 #include "../basic/texture.h"
 
-typedef struct
+typedef struct Sprite2D
 {
     CoreObject* core;
     ScePspFVector2 uv_a;
@@ -22,7 +22,7 @@ typedef struct
 } Sprite2D;
 
 //Taken from here: https://pspdev.github.io/basic_programs.html
-typedef struct
+typedef struct TextureVertex
 {
     float u, v;
     uint32_t colour;
