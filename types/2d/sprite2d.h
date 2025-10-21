@@ -51,7 +51,7 @@ Sprite2D* create_sprite2d(Texture* texture, unsigned int modulate,
 //Taken from here: https://pspdev.github.io/basic_programs.html
 //And modified for Revel Engine.
 void draw_sprite2d(Sprite2D* sprite) {
-    static TextureVertex vertices[2];
+    TextureVertex* vertices = (TextureVertex*)malloc(2 * sizeof(TextureVertex));
 
     vertices[0].u = sprite->uv_a.x;
     vertices[0].v = sprite->uv_a.y;
@@ -70,6 +70,7 @@ void draw_sprite2d(Sprite2D* sprite) {
     bind_texture(sprite->texture);
     sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
     sceKernelDcacheWritebackInvalidateAll();
+    free(vertices);
 }
 
 void draw_sprite2d_no_tex(Sprite2D* sprite) {
