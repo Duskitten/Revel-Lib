@@ -14,6 +14,8 @@ extern "C"{
 //Base Resources
 #include "types/basic/texture.h"
 #include "types/basic/coreobject.h"
+//Math Resources
+#include "types/math/float_math.h"
 
 #if __cplusplus__
 };
