@@ -31,8 +31,8 @@ typedef struct Font2D{
 
 
 
-Font2D* create_font2d(Texture* texture, ScePspIVector2 character_slices, ScePspFVector2 character_size, 
-    ScePspFVector2 character_spacing, unsigned int modulate, char* charactersA){
+Font2D* create_font2d(Texture* texture, unsigned int modulate, ScePspIVector2 character_slices, ScePspFVector2 character_size, 
+    ScePspFVector2 character_spacing,  char* charactersA){
     Font2D* font = (Font2D*)malloc(sizeof(Font2D));
 
     if(font != NULL){
@@ -81,7 +81,6 @@ void draw_font2d(Font2D* font, char* text, ScePspFVector2 position){
     int doubled_real_size = real_size * 2;
     //Apparently we need to add buffer space? not totally sure why. But it works.
     ScePspIVector2 RelayPos = (ScePspIVector2){0,0};
-
     TextureVertex* vertices = (TextureVertex*)malloc(doubled_real_size * sizeof(TextureVertex));
     
     for(int x = 0; x < real_size; x++){
@@ -95,18 +94,18 @@ void draw_font2d(Font2D* font, char* text, ScePspFVector2 position){
         } else 
         if(found){
             //pspDebugScreenSetXY(32, x+1);
-            FontCharacter sprite = *font->sprites[(found - font->characters)];
-            pspDebugScreenSetXY(32, x);
-            pspDebugScreenPrintf("%c, with %d", sprite.character, (found - font->characters));
-            vertices[realX].u = (float)sprite.uv_a.x;
-            vertices[realX].v = (float)sprite.uv_a.y;
+            FontCharacter* sprite = font->sprites[(found - font->characters)];
+            //pspDebugScreenSetXY(32, x);
+            //pspDebugScreenPrintf("%c, with %d", sprite.character, (found - font->characters));
+            vertices[realX].u = (float)sprite->uv_a.x;
+            vertices[realX].v = (float)sprite->uv_a.y;
             vertices[realX].colour = font->modulate;
             vertices[realX].x = position.x + (RelayPos.x * font->character_size.x);
             vertices[realX].y = position.y+ (RelayPos.y * font->character_size.y);
             vertices[realX].z = 0.0f;
             
-            vertices[realXP1].u = (float)sprite.uv_b.x;
-            vertices[realXP1].v = (float)sprite.uv_b.y;
+            vertices[realXP1].u = (float)sprite->uv_b.x;
+            vertices[realXP1].v = (float)sprite->uv_b.y;
             vertices[realXP1].colour = font->modulate;
             vertices[realXP1].x = position.x + (RelayPos.x * font->character_size.x) + font->character_size.x;
             vertices[realXP1].y = position.y + font->character_size.y + (RelayPos.y * font->character_size.y);
@@ -118,6 +117,7 @@ void draw_font2d(Font2D* font, char* text, ScePspFVector2 position){
     bind_texture(font->texture);
     sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, doubled_real_size, 0, vertices);
     free(vertices);
+    vertices = NULL;
 }
 
 #if __cplusplus__

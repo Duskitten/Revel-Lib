@@ -194,6 +194,7 @@ void draw_patch2d(Patch2D* patch) {
     bind_texture(patch->texture);
     sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 18, 0, vertices);
     free(vertices);
+    vertices = NULL;
 }
 
 #if __cplusplus__

@@ -154,6 +154,7 @@ Texture* load_texture(const char* filename, const int vram) {
     swizzle_fast((u8*)swizzled_pixels, (const u8*)dataBuffer, tex->pW * 4, tex->pH);
 
     free(dataBuffer);
+    dataBuffer = NULL;
     tex->data = swizzled_pixels;
 
     sceKernelDcacheWritebackInvalidateAll();

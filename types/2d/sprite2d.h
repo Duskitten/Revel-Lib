@@ -72,6 +72,7 @@ void draw_sprite2d(Sprite2D* sprite) {
     bind_texture(sprite->texture);
     sceGuDrawArray(GU_SPRITES, GU_COLOR_8888 | GU_TEXTURE_32BITF | GU_VERTEX_32BITF | GU_TRANSFORM_2D, 2, 0, vertices);
     free(vertices);
+    vertices = NULL;
 }
 
 #if __cplusplus__

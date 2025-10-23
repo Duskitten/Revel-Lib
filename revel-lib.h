@@ -18,6 +18,7 @@ extern "C"{
 
 //Math Resources
 #include "types/math/float_math.h"
+#include "types/math/int_math.h"
 #include "types/math/rect_math.h"
 
 #if __cplusplus__
