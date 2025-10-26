@@ -46,7 +46,7 @@ Font2D* create_font2d(Texture* texture, unsigned int modulate, ScePspIVector2 ch
         font->character_slices = character_slices;
         unsigned int charlength = strlen(charactersA);
         
-        FontCharacter* char_compiler[charlength];
+        FontCharacter* char_compiler[charlength+sizeof(FontCharacter*)];
         ScePspIVector2 pos = {0,0};
         int realvalue = 0;
         for(int i = 0; i < charlength; i++){
