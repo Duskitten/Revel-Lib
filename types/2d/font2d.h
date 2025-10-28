@@ -91,6 +91,19 @@ void draw_font2d(Font2D* font, char* text, ScePspFVector2 position){
         if(text[x] == '\n'){
             RelayPos.x = -1;
             RelayPos.y += 1;
+            vertices[realX].u = 0;
+            vertices[realX].v = 0;
+            vertices[realX].colour = font->modulate;
+            vertices[realX].x = 0;
+            vertices[realX].y = 0;
+            vertices[realX].z = 0.0f;
+            
+            vertices[realXP1].u = 0;
+            vertices[realXP1].v = 0;
+            vertices[realXP1].colour = font->modulate;
+            vertices[realXP1].x = 0;
+            vertices[realXP1].y = 0;
+            vertices[realXP1].z = 0.0f; 
         } else 
         if(found){
             //pspDebugScreenSetXY(32, x+1);
