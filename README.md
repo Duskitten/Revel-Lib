@@ -33,3 +33,13 @@ A few curated demos by myself, and potentially others, if you'd like yours added
 [(WIP) R-TRPG](https://github.com/Duskitten/Revel-Lib_R-TRPG)
 
 ---
+
+## Extra Tools:
+
+A list of tools that I've found helpful for doing things in Revel.
+
+[Font2Bitmap (Convert font file to png for font2D)](https://github.com/stmn/font2bitmap)
+
+---
+
+
